@@ -50,11 +50,12 @@ dependencies {
 }
 
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.3'
-}
-
 test {
     include '**/*Test.*'
     exclude '**/*IT.*'
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.3'
+}
+
