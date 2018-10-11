@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: ${ROOT_LOGGING_LEVEL:INFO}
+    org.apache.http: WARN
+
+govNotify:
+  key: ${GOV_NOTIFY_API_KEY:key}
+  template:
+    invite: ${GOV_NOTIFY_INVITE_TEMPLATE_ID:template}
+    reset: ${GOV_NOTIFY_RESET_TEMPLATE_ID:template}
+    resetSuccessful: ${GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID:template}
+
