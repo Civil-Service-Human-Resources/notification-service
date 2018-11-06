@@ -1,47 +1,82 @@
 package uk.gov.cshr.notificationservice.services;
 
-import org.hamcrest.MatcherAssert;
-import org.junit.Before;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.cshr.notificationservice.dto.EmailMessageDto;
+import uk.gov.cshr.notificationservice.exception.NotificationServiceException;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
+import uk.gov.service.notify.SendEmailResponse;
 
-import java.util.HashMap;
+import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class NotificationServiceTest {
-    public static final String API_KEY = "api123";
-    public static final String TEMPLATE_ID = "template123";
-    public static final String EMAIL_ADDRESS = "example@example.com";
-    public static final HashMap<String, String> PERSONALISATION = new HashMap<>();
-    public static final String REFERENCE = "reference123";
-    public static final String REPLAY_EMAIL_ADDRESS = "replay@example.com";
-
-    private NotificationService notificationService;
-
+    @Mock
     private NotificationClient notificationClient;
 
-    @Before
-    public void setup() {
-        initMocks(this);
-        notificationClient = new NotificationClient(API_KEY);
-        notificationService = new NotificationService(notificationClient);
+    @InjectMocks
+    private NotificationService notificationService;
+
+    @Test
+    public void shouldSendMessage() throws NotificationClientException {
+        String templateId = "template-id";
+        String recipient = "message-recipient";
+        Map<String, String> personalisation = ImmutableMap.of("name", "test-name");
+        String reference = "message-reference";
+        String replyToId = "reply-to-id";
+
+        EmailMessageDto message = new EmailMessageDto();
+        message.setTemplateId(templateId);
+        message.setRecipient(recipient);
+        message.setPersonalisation(personalisation);
+        message.setReference(reference);
+        message.setReplyToId(replyToId);
+
+        SendEmailResponse response = mock(SendEmailResponse.class);
+        when(notificationClient.sendEmail(templateId, recipient, personalisation, reference, replyToId))
+                .thenReturn(response);
+
+        notificationService.send(message);
+
+        verify(notificationClient).sendEmail(templateId, recipient, personalisation, reference, replyToId);
     }
 
     @Test
-    public void testSendEmailNotification() throws NotificationClientException {
-//        JSONObject obj = new JSONObject();
-//        obj.append("id", "123");
-//        SendEmailResponse sendEmailResponse = new SendEmailResponse(obj.toString());
-//        when(notificationClient.sendEmail(TEMPLATE_ID, EMAIL_ADDRESS, PERSONALISATION, REFERENCE, REPLAY_EMAIL_ADDRESS)).thenReturn(sendEmailResponse);
-        MatcherAssert.assertThat(1, equalTo(1));
-    }
+    public void shouldThrowNotificationServiceException() throws NotificationClientException {
+        String templateId = "template-id";
+        String recipient = "message-recipient";
+        Map<String, String> personalisation = ImmutableMap.of("name", "test-name");
+        String reference = "message-reference";
+        String replyToId = "reply-to-id";
 
+        EmailMessageDto message = new EmailMessageDto();
+        message.setTemplateId(templateId);
+        message.setRecipient(recipient);
+        message.setPersonalisation(personalisation);
+        message.setReference(reference);
+        message.setReplyToId(replyToId);
+
+        NotificationClientException exception = mock(NotificationClientException.class);
+
+        doThrow(exception)
+                .when(notificationClient).sendEmail(templateId, recipient, personalisation, reference, replyToId);
+
+        try {
+            notificationService.send(message);
+            fail("Expected NotificationServiceException");
+        } catch (NotificationServiceException e) {
+            assertEquals("Unable to send message", e.getMessage());
+            assertTrue(e.getCause() instanceof NotificationClientException);
+        }
+    }
 }
