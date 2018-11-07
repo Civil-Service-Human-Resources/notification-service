@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cshr.notificationservice.dto.EmailMessageDto;
@@ -20,12 +21,14 @@ import uk.gov.cshr.notificationservice.services.NotificationService;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebMvcTest({NotificationController.class, ValidationErrorsFactory.class})
+@WithMockUser(username = "user")
 public class NotificationControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -52,7 +55,7 @@ public class NotificationControllerTest {
         message.setReplyToId("reply-to-id");
 
         mockMvc.perform(
-                post("/notifications/")
+                post("/notifications/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -69,7 +72,7 @@ public class NotificationControllerTest {
         message.setReplyToId("reply-to-id");
 
         mockMvc.perform(
-                post("/notifications/")
+                post("/notifications/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -93,7 +96,7 @@ public class NotificationControllerTest {
         message.setRecipient("not-valid");
 
         mockMvc.perform(
-                post("/notifications/")
+                post("/notifications/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -122,12 +125,11 @@ public class NotificationControllerTest {
         doThrow(exception).when(notificationService).send(message);
 
         mockMvc.perform(
-                post("/notifications/")
+                post("/notifications/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", equalTo(errorMessage)));
     }
-
 }
