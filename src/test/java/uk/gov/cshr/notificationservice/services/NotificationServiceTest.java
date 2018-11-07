@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.cshr.notificationservice.dto.EmailMessageDto;
+import uk.gov.cshr.notificationservice.dto.MessageDto;
 import uk.gov.cshr.notificationservice.exception.NotificationServiceException;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -33,22 +33,20 @@ public class NotificationServiceTest {
         String recipient = "message-recipient";
         Map<String, String> personalisation = ImmutableMap.of("name", "test-name");
         String reference = "message-reference";
-        String replyToId = "reply-to-id";
 
-        EmailMessageDto message = new EmailMessageDto();
+        MessageDto message = new MessageDto();
         message.setTemplateId(templateId);
         message.setRecipient(recipient);
         message.setPersonalisation(personalisation);
         message.setReference(reference);
-        message.setReplyToId(replyToId);
 
         SendEmailResponse response = mock(SendEmailResponse.class);
-        when(notificationClient.sendEmail(templateId, recipient, personalisation, reference, replyToId))
+        when(notificationClient.sendEmail(templateId, recipient, personalisation, reference))
                 .thenReturn(response);
 
         notificationService.send(message);
 
-        verify(notificationClient).sendEmail(templateId, recipient, personalisation, reference, replyToId);
+        verify(notificationClient).sendEmail(templateId, recipient, personalisation, reference);
     }
 
     @Test
@@ -57,19 +55,17 @@ public class NotificationServiceTest {
         String recipient = "message-recipient";
         Map<String, String> personalisation = ImmutableMap.of("name", "test-name");
         String reference = "message-reference";
-        String replyToId = "reply-to-id";
 
-        EmailMessageDto message = new EmailMessageDto();
+        MessageDto message = new MessageDto();
         message.setTemplateId(templateId);
         message.setRecipient(recipient);
         message.setPersonalisation(personalisation);
         message.setReference(reference);
-        message.setReplyToId(replyToId);
 
         NotificationClientException exception = mock(NotificationClientException.class);
 
         doThrow(exception)
-                .when(notificationClient).sendEmail(templateId, recipient, personalisation, reference, replyToId);
+                .when(notificationClient).sendEmail(templateId, recipient, personalisation, reference);
 
         try {
             notificationService.send(message);

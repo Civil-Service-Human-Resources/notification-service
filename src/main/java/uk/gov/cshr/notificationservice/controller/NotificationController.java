@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import uk.gov.cshr.notificationservice.dto.EmailMessageDto;
+import uk.gov.cshr.notificationservice.dto.MessageDto;
 import uk.gov.cshr.notificationservice.services.NotificationService;
 
 import javax.validation.Valid;
@@ -24,7 +24,7 @@ public class NotificationController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity sendNotification(@Valid @RequestBody EmailMessageDto message){
+    public ResponseEntity sendNotification(@Valid @RequestBody MessageDto message){
         notificationService.send(message);
 
         return new ResponseEntity<>(OK);

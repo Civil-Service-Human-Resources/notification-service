@@ -2,8 +2,9 @@ package uk.gov.cshr.notificationservice.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.cshr.notificationservice.dto.EmailMessageDto;
+import uk.gov.cshr.notificationservice.dto.MessageDto;
 import uk.gov.cshr.notificationservice.exception.NotificationServiceException;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -19,14 +20,13 @@ public class NotificationService {
         this.client = client;
     }
 
-    public void send(EmailMessageDto message) {
+    public void send(MessageDto message) {
         try {
             SendEmailResponse response = client.sendEmail(
                     message.getTemplateId(),
                     message.getRecipient(),
                     message.getPersonalisation(),
-                    message.getReference(),
-                    message.getReplyToId()
+                    message.getReference()
             );
 
             LOGGER.info("Notify email sent to: {}", response.getBody());

@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.cshr.notificationservice.dto.EmailMessageDto;
+import uk.gov.cshr.notificationservice.dto.MessageDto;
 import uk.gov.cshr.notificationservice.dto.factory.ValidationErrorsFactory;
 import uk.gov.cshr.notificationservice.exception.NotificationServiceException;
 import uk.gov.cshr.notificationservice.services.NotificationService;
@@ -47,12 +47,11 @@ public class NotificationControllerTest {
 
     @Test
     public void sendNotification() throws Exception {
-        EmailMessageDto message = new EmailMessageDto();
+        MessageDto message = new MessageDto();
         message.setRecipient("user@example.org");
         message.setPersonalisation(ImmutableMap.of("name", "test-name"));
         message.setTemplateId("template-id");
         message.setReference("message-reference");
-        message.setReplyToId("reply-to-id");
 
         mockMvc.perform(
                 post("/notifications/").with(csrf())
@@ -66,10 +65,9 @@ public class NotificationControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfRecipientOrTemplateIsMissing() throws Exception {
-        EmailMessageDto message = new EmailMessageDto();
+        MessageDto message = new MessageDto();
         message.setPersonalisation(ImmutableMap.of("name", "test-name"));
         message.setReference("message-reference");
-        message.setReplyToId("reply-to-id");
 
         mockMvc.perform(
                 post("/notifications/").with(csrf())
@@ -88,11 +86,10 @@ public class NotificationControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfRecipientIsNotValidEmailAddress() throws Exception {
-        EmailMessageDto message = new EmailMessageDto();
+        MessageDto message = new MessageDto();
         message.setPersonalisation(ImmutableMap.of("name", "test-name"));
         message.setTemplateId("template-id");
         message.setReference("message-reference");
-        message.setReplyToId("reply-to-id");
         message.setRecipient("not-valid");
 
         mockMvc.perform(
@@ -110,12 +107,11 @@ public class NotificationControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfSendingMessageFails() throws Exception {
-        EmailMessageDto message = new EmailMessageDto();
+        MessageDto message = new MessageDto();
         message.setRecipient("user@example.org");
         message.setPersonalisation(ImmutableMap.of("name", "test-name"));
         message.setTemplateId("template-id");
         message.setReference("message-reference");
-        message.setReplyToId("reply-to-id");
 
         String errorMessage = "test error message";
 

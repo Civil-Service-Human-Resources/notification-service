@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Data
-public class EmailMessageDto {
+public class MessageDto {
     private Map<String, String> personalisation;
 
     @Email(message="{message.recipient.valid}")
@@ -19,6 +19,4 @@ public class EmailMessageDto {
     private String templateId;
 
     private String reference = UUID.randomUUID().toString();
-
-    private String replyToId;
 }
