@@ -10,10 +10,6 @@ logging:
 
 govNotify:
   key: ${GOV_NOTIFY_API_KEY:key}
-  template:
-    invite: ${GOV_NOTIFY_INVITE_TEMPLATE_ID:template}
-    reset: ${GOV_NOTIFY_RESET_TEMPLATE_ID:template}
-    resetSuccessful: ${GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID:template}
 
 oauth:
   serviceUrl: ${OAUTH_SERVICE_URL:http://localhost:8080}

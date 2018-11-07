@@ -23,7 +23,7 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(path = "/email", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity sendNotification(@Valid @RequestBody MessageDto message){
         notificationService.send(message);
 
