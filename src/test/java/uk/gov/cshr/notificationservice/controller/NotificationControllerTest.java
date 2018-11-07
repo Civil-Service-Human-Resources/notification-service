@@ -54,7 +54,7 @@ public class NotificationControllerTest {
         message.setReference("message-reference");
 
         mockMvc.perform(
-                post("/notifications/").with(csrf())
+                post("/notifications/email/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -70,7 +70,7 @@ public class NotificationControllerTest {
         message.setReference("message-reference");
 
         mockMvc.perform(
-                post("/notifications/").with(csrf())
+                post("/notifications/email/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -93,7 +93,7 @@ public class NotificationControllerTest {
         message.setRecipient("not-valid");
 
         mockMvc.perform(
-                post("/notifications/").with(csrf())
+                post("/notifications/email/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -121,7 +121,7 @@ public class NotificationControllerTest {
         doThrow(exception).when(notificationService).send(message);
 
         mockMvc.perform(
-                post("/notifications/").with(csrf())
+                post("/notifications/email/").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
