@@ -38,6 +38,10 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile 'org.springframework.security.oauth:spring-security-oauth2:2.3.3.RELEASE'
 
+    compile group: 'com.microsoft.azure', name: 'applicationinsights-web-auto', version: '2.5.0'
+    compile group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: '2.5.0'
+    compile group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.5.0'
+
     // https://github.com/alphagov/notifications-java-client
     compile 'uk.gov.service.notify:notifications-java-client:3.12.0-RELEASE'
     compile 'org.projectlombok:lombok:1.18.4'
