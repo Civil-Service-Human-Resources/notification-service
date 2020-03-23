@@ -2,7 +2,7 @@ FROM openjdk:8u181
 
 ENV SPRING_PROFILES_ACTIVE production
 
-EXPOSE 9005
+EXPOSE 9006
 
 CMD java -jar /data/app.jar
 
