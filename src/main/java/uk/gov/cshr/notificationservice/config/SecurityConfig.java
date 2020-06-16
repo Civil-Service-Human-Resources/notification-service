@@ -16,6 +16,9 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -27,13 +30,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${oauth.tokenUrl}")
     private String tokenUrl;
 
-
     @Value("${oauth.clientId}")
     private String clientId;
 
-
     @Value("${oauth.clientSecret}")
     private String clientSecret;
+
+    @Value("${oauth.jwtKey}")
+    private String jwtKey;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -49,6 +53,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
+    }
+
+    @Bean
+    public TokenStore getTokenStore() {
+        return new JwtTokenStore(accessTokenConverter());
+    }
+
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        jwtAccessTokenConverter.setSigningKey(jwtKey);
+        return jwtAccessTokenConverter;
     }
 
     @Bean
