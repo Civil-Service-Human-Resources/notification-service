@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Spring Boot based API acting as adapter service for (GOV.UK Notify)[https://www.notifications.service.gov.uk/documentation] to send notifications to users such as account invites, account deletion and course completion. Other applications pass template references to Notification Service and it invokes the GOV.UK Notify API to send emails.
+Spring Boot based API acting as adapter service for [GOV.UK Notify](https://www.notifications.service.gov.uk/documentation) to send notifications to users such as account invites, account deletion and course completion. Other applications pass template references to Notification Service and it invokes the GOV.UK Notify API to send emails.
 
 Note that this is not the only client of GOV.UK Notify in the LPG system. Currently two other services have direct integrations with GOV.UK Notify: Learner Record in its course reminder scheduled jobs and CSRS in its line manager allocation functionality.
 
