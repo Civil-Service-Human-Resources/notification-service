@@ -1,6 +1,6 @@
 @Library('lpg-jenkins-library')_
 
-javaIntegrationPipeline {
+mavenIntegrationPipeline {
     dockerRepository = 'notification-service'
     environment = 'integration'
     terraformModuleName = 'notification-service'
