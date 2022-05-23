@@ -25,18 +25,10 @@ steps:
       jdkVersionOption: '1.8'
       javaHomeOption: 'JDKVersion'
       jdkArchitectureOption: 'x64'
-      publishJUnitResults: false
+      publishJUnitResults: true
       testResultsFiles: 'build/test-results/**/TEST-*.xml'
       tasks: 'build'
-    displayName: 'Install Gradle and Java 8'
-
-
-
-  - script: |
-      echo starting build
-      ./gradlew clean
-      ./gradlew build
-    displayName: 'Build with Gradle'
+    displayName: 'Gradle build'
 
   - task: Docker@2
     inputs:
