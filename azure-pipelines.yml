@@ -45,5 +45,5 @@ steps:
         repository: 'notification-service/test'
       command: 'buildAndPush'
       Dockerfile: '**/Dockerfile'
-      tags: '$(Build.SourceBranchName)'
+      tags: '- task: Docker@2
         
