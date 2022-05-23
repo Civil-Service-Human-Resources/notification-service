@@ -21,7 +21,7 @@ pool:
 steps:
   - task: Gradle@3
     inputs:
-      gradleWrapperFile: 'build.gradle'
+      gradleWrapperFile: 'gradlew'
       jdkVersionOption: '1.8'
       javaHomeOption: 'JDKVersion'
       jdkArchitectureOption: 'x64'
@@ -29,6 +29,8 @@ steps:
       testResultsFiles: 'build/test-results/**/TEST-*.xml'
       tasks: 'build'
     displayName: 'Install Gradle and Java 8'
+
+
 
   - script: |
       echo starting build
