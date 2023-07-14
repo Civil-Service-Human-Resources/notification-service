@@ -9,7 +9,7 @@ logging:
     org.apache.http: WARN
 
 govNotify:
-  key: ${GOV_NOTIFY_API_KEY:key}
+  key: ${GOV_NOTIFY_API_KEY:test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7}
 
 oauth:
   serviceUrl: ${OAUTH_SERVICE_URL:http://localhost:8080}
@@ -17,5 +17,5 @@ oauth:
   clientSecret: ${CLIENT_SECRET:test}
   checkTokenUrl: "${oauth.serviceUrl}/oauth/check_token"
   tokenUrl: "${oauth.serviceUrl}/oauth/token"
-  jwtKey: ${jwt_key}
+  jwtKey: ${jwt_key:dummy}
 
