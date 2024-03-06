@@ -1,4 +1,4 @@
-FROM openjdk:8u181
+FROM amazoncorretto:8-alpine
 
 ENV SPRING_PROFILES_ACTIVE production
 
