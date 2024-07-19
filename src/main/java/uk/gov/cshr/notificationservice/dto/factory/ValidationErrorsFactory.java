@@ -6,6 +6,7 @@ import uk.gov.cshr.notificationservice.dto.ValidationError;
 import uk.gov.cshr.notificationservice.dto.ValidationErrors;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,7 @@ public class ValidationErrorsFactory {
     public ValidationErrors create(List<FieldError> fieldErrors) {
         List<FieldError> errors = new ArrayList<>(fieldErrors);
 
-        errors.sort((o1, o2) -> (o1.getField().compareTo(o2.getField())));
+        errors.sort(Comparator.comparing(FieldError::getField));
 
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.setSize(errors.size());

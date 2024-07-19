@@ -1,90 +1,90 @@
 package uk.gov.cshr.notificationservice.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestOperations;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
-import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
-import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
-@EnableResourceServer
-@EnableWebSecurity
-@EnableOAuth2Client
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-    @Value("${oauth.tokenUrl}")
-    private String tokenUrl;
-
-    @Value("${oauth.clientId}")
-    private String clientId;
-
-    @Value("${oauth.clientSecret}")
-    private String clientSecret;
-
-    @Value("${oauth.jwtKey}")
+@Slf4j
+public class SecurityConfig {
+    @Value("${security.oauth2.resource.jwt.key-value}")
     private String jwtKey;
+
+    @Bean
+    @Order(1)
+    public SecurityFilterChain permittedChain(HttpSecurity httpSecurity) throws Exception {
+        log.info("Building base filter chain");
+        return httpSecurity.securityMatcher("/health")
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry.anyRequest().permitAll())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain basicAuthChain(HttpSecurity httpSecurity) throws Exception {
+        log.info("Building basic auth filter chain");
+        return httpSecurity.securityMatcher("/swagger-ui/**", "/v3/api-docs/**")
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry.anyRequest().authenticated())
+                .httpBasic(withDefaults())
+                .build();
+    }
+
+    @Bean
+    @Order(3)
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity.securityMatcher("/notifications/**")
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(httpSecurityOAuth2ResourceServerConfigurer -> httpSecurityOAuth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())))
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .build();
+    }
 
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
-        http.csrf().disable().authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/health").permitAll()
-                .anyRequest().authenticated();
-    }
-
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.GET, "/health");
+    @Bean
+    public NimbusJwtDecoder jwtDecoder() {
+        SecretKey secretKey = new SecretKeySpec(jwtKey.getBytes(), "HMACSHA256");
+        return NimbusJwtDecoder
+                .withSecretKey(secretKey)
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
     }
 
     @Bean
-    public TokenStore getTokenStore() {
-        return new JwtTokenStore(accessTokenConverter());
-    }
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        final JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities");
+        grantedAuthoritiesConverter.setAuthorityPrefix("");
 
-    @Bean
-    public JwtAccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setSigningKey(jwtKey);
-        return jwtAccessTokenConverter;
-    }
-
-    @Bean
-    public OAuth2ProtectedResourceDetails resourceDetails() {
-
-        ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
-        resource.setId("identity");
-        resource.setAccessTokenUri(tokenUrl);
-        resource.setClientId(clientId);
-        resource.setClientSecret(clientSecret);
-
-        return resource;
-    }
-
-    @Bean
-    public OAuth2RestOperations oAuthRestTemplate(OAuth2ProtectedResourceDetails resourceDetails) {
-        AccessTokenRequest atr = new DefaultAccessTokenRequest();
-        return new OAuth2RestTemplate(resourceDetails, new DefaultOAuth2ClientContext(atr));
+        final JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
     }
 }

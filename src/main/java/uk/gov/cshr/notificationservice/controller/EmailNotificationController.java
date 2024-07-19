@@ -5,22 +5,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import uk.gov.cshr.notificationservice.dto.email.TemplatedMessageDto;
+import uk.gov.cshr.notificationservice.dto.email.MessageDto;
 import uk.gov.cshr.notificationservice.services.EmailService;
 
 import static org.springframework.http.HttpStatus.OK;
 
 @Controller
-@RequestMapping("/notifications/")
+@RequestMapping("/notifications/emails")
 @RequiredArgsConstructor
-public class NotificationController {
+public class EmailNotificationController {
 
     private final EmailService notificationService;
 
-    @PostMapping(path = "/email", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/{name}/send", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(OK)
     @ResponseBody
-    public void sendNotification(@Valid @RequestBody TemplatedMessageDto message){
-        notificationService.send(message);
+    public void sendEmail(@PathVariable String name, @Valid @RequestBody MessageDto message){
+        notificationService.send(name, message);
     }
+
 }
