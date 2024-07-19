@@ -55,10 +55,10 @@ public class NotificationControllerTest {
         message.setReference("message-reference");
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(emailService).send(message);
@@ -71,10 +71,10 @@ public class NotificationControllerTest {
         message.setReference("message-reference");
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.size", equalTo(2)))
                 .andExpect(jsonPath("$.errors[0].field", equalTo("recipient")))
@@ -82,7 +82,7 @@ public class NotificationControllerTest {
                 .andExpect(jsonPath("$.errors[1].field", equalTo("templateId")))
                 .andExpect(jsonPath("$.errors[1].details", equalTo("templateId is required")));
 
-        verifyZeroInteractions(emailService);
+        verifyNoInteractions(emailService);
     }
 
     @Test
@@ -94,16 +94,16 @@ public class NotificationControllerTest {
         message.setRecipient("not-valid");
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.size", equalTo(1)))
                 .andExpect(jsonPath("$.errors[0].field", equalTo("recipient")))
                 .andExpect(jsonPath("$.errors[0].details", equalTo("Recipient is not a valid email address")));
 
-        verifyZeroInteractions(emailService);
+        verifyNoInteractions(emailService);
     }
 
     @Test
@@ -122,10 +122,10 @@ public class NotificationControllerTest {
         doThrow(exception).when(emailService).send(message);
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", equalTo(errorMessage)));
     }
