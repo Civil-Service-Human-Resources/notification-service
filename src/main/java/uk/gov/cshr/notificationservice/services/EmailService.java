@@ -38,8 +38,7 @@ public class EmailService {
 
     public void send(String emailName, MessageDto message) {
         EmailTemplate emailTemplate = emailTemplatesRepository.findById(emailName).orElseThrow(() -> new EmailTemplateNotFound(emailName));
-        TemplatedMessageDto templatedMessageDto = (TemplatedMessageDto) message;
-        templatedMessageDto.setTemplateId(emailTemplate.getExternalTemplateId());
+        TemplatedMessageDto templatedMessageDto = new TemplatedMessageDto(message.getPersonalisation(), message.getRecipient(), message.getReference(), emailTemplate.getExternalTemplateId());
         send(templatedMessageDto);
     }
 
