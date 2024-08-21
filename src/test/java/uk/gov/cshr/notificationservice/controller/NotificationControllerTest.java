@@ -14,10 +14,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.cshr.notificationservice.dto.MessageDto;
+import uk.gov.cshr.notificationservice.dto.email.MessageDto;
+import uk.gov.cshr.notificationservice.dto.email.TemplatedMessageDto;
 import uk.gov.cshr.notificationservice.dto.factory.ValidationErrorsFactory;
 import uk.gov.cshr.notificationservice.exception.NotificationServiceException;
-import uk.gov.cshr.notificationservice.services.NotificationService;
+import uk.gov.cshr.notificationservice.services.EmailService;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
@@ -34,7 +35,7 @@ public class NotificationControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private NotificationService notificationService;
+    private EmailService emailService;
 
     private ObjectMapper objectMapper;
 
@@ -47,20 +48,20 @@ public class NotificationControllerTest {
 
     @Test
     public void sendNotification() throws Exception {
-        MessageDto message = new MessageDto();
+        TemplatedMessageDto message = new TemplatedMessageDto();
         message.setRecipient("user@example.org");
         message.setPersonalisation(ImmutableMap.of("name", "test-name"));
         message.setTemplateId("template-id");
         message.setReference("message-reference");
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verify(notificationService).send(message);
+        verify(emailService).send(message);
     }
 
     @Test
@@ -70,10 +71,10 @@ public class NotificationControllerTest {
         message.setReference("message-reference");
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.size", equalTo(2)))
                 .andExpect(jsonPath("$.errors[0].field", equalTo("recipient")))
@@ -81,33 +82,33 @@ public class NotificationControllerTest {
                 .andExpect(jsonPath("$.errors[1].field", equalTo("templateId")))
                 .andExpect(jsonPath("$.errors[1].details", equalTo("templateId is required")));
 
-        verifyZeroInteractions(notificationService);
+        verifyNoInteractions(emailService);
     }
 
     @Test
     public void shouldReturnBadRequestIfRecipientIsNotValidEmailAddress() throws Exception {
-        MessageDto message = new MessageDto();
+        TemplatedMessageDto message = new TemplatedMessageDto();
         message.setPersonalisation(ImmutableMap.of("name", "test-name"));
         message.setTemplateId("template-id");
         message.setReference("message-reference");
         message.setRecipient("not-valid");
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.size", equalTo(1)))
                 .andExpect(jsonPath("$.errors[0].field", equalTo("recipient")))
                 .andExpect(jsonPath("$.errors[0].details", equalTo("Recipient is not a valid email address")));
 
-        verifyZeroInteractions(notificationService);
+        verifyNoInteractions(emailService);
     }
 
     @Test
     public void shouldReturnBadRequestIfSendingMessageFails() throws Exception {
-        MessageDto message = new MessageDto();
+        TemplatedMessageDto message = new TemplatedMessageDto();
         message.setRecipient("user@example.org");
         message.setPersonalisation(ImmutableMap.of("name", "test-name"));
         message.setTemplateId("template-id");
@@ -118,13 +119,13 @@ public class NotificationControllerTest {
         NotificationServiceException exception =
                 new NotificationServiceException(errorMessage, mock(Throwable.class));
 
-        doThrow(exception).when(notificationService).send(message);
+        doThrow(exception).when(emailService).send(message);
 
         mockMvc.perform(
-                post("/notifications/email/").with(csrf())
+                post("/notifications/email").with(csrf())
                         .content(objectMapper.writeValueAsString(message))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", equalTo(errorMessage)));
     }
