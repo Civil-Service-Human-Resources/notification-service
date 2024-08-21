@@ -12,7 +12,7 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
-    root: ${ROOT_LOGGING_LEVEL:DEBUG}
+    root: ${ROOT_LOGGING_LEVEL:INFO}
     org.apache.http: WARN
 
 govNotify:
@@ -20,9 +20,7 @@ govNotify:
 
 oauth:
   serviceUrl: ${OAUTH_SERVICE_URL:http://localhost:8080}
-#  checkTokenEndpoint: ${OAUTH_CHECK_TOKEN_ENDPOINT:/oauth/check_token}
-#  checkTokenUrl: "${oauth.serviceUrl}${oauth.checkTokenEndpoint}"
-  tokenEndpoint: ${OAUTH_TOKEN_ENDPOINT:/oauth/token}
+  tokenEndpoint: ${OAUTH_TOKEN_ENDPOINT:/oauth2/token}
 spring:
   datasource:
     username: ${DATASOURCE_USERNAME:root}
