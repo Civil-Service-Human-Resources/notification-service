@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.cshr.notificationservice.dto.MessageDto;
+import uk.gov.cshr.notificationservice.dto.email.TemplatedMessageDto;
 import uk.gov.cshr.notificationservice.exception.NotificationServiceException;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -14,9 +14,7 @@ import uk.gov.service.notify.SendEmailResponse;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -25,7 +23,7 @@ public class NotificationServiceTest {
     private NotificationClient notificationClient;
 
     @InjectMocks
-    private NotificationService notificationService;
+    private EmailService emailService;
 
     @Test
     public void shouldSendMessage() throws NotificationClientException {
@@ -34,7 +32,7 @@ public class NotificationServiceTest {
         Map<String, String> personalisation = ImmutableMap.of("name", "test-name");
         String reference = "message-reference";
 
-        MessageDto message = new MessageDto();
+        TemplatedMessageDto message = new TemplatedMessageDto();
         message.setTemplateId(templateId);
         message.setRecipient(recipient);
         message.setPersonalisation(personalisation);
@@ -44,7 +42,7 @@ public class NotificationServiceTest {
         when(notificationClient.sendEmail(templateId, recipient, personalisation, reference))
                 .thenReturn(response);
 
-        notificationService.send(message);
+        emailService.send(message);
 
         verify(notificationClient).sendEmail(templateId, recipient, personalisation, reference);
     }
@@ -56,7 +54,7 @@ public class NotificationServiceTest {
         Map<String, String> personalisation = ImmutableMap.of("name", "test-name");
         String reference = "message-reference";
 
-        MessageDto message = new MessageDto();
+        TemplatedMessageDto message = new TemplatedMessageDto();
         message.setTemplateId(templateId);
         message.setRecipient(recipient);
         message.setPersonalisation(personalisation);
@@ -68,7 +66,7 @@ public class NotificationServiceTest {
                 .when(notificationClient).sendEmail(templateId, recipient, personalisation, reference);
 
         try {
-            notificationService.send(message);
+            emailService.send(message);
             fail("Expected NotificationServiceException");
         } catch (NotificationServiceException e) {
             assertEquals("Unable to send message", e.getMessage());

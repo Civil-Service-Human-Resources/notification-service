@@ -1,6 +1,13 @@
+database:
+  host: ${DATABASE_HOST:jdbc:mysql://localhost:3306}
+  name: ${DATABASE_NAME:notification}
+  use-ssl: ${DATABASE_USESSL:false}
 server:
   port: 9006
-
+info:
+  app:
+    name: "Notification Service"
+    description: "API for sending notifications"
 logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
@@ -13,11 +20,29 @@ govNotify:
 
 oauth:
   serviceUrl: ${OAUTH_SERVICE_URL:http://localhost:8080}
-  clientId: ${CLIENT_ID:9fbd4ae2-2db3-44c7-9544-88e80255b56e}
-  clientSecret: ${CLIENT_SECRET:test}
-  checkTokenEndpoint: ${OAUTH_CHECK_TOKEN_ENDPOINT:/oauth/check_token}
-  checkTokenUrl: "${oauth.serviceUrl}${oauth.checkTokenEndpoint}"
-  tokenEndpoint: ${OAUTH_TOKEN_ENDPOINT:/oauth/token}
-  tokenUrl: "${oauth.serviceUrl}${oauth.tokenEndpoint}"
-  jwtKey: ${jwt_key}
-
+  tokenEndpoint: ${OAUTH_TOKEN_ENDPOINT:/oauth2/token}
+spring:
+  datasource:
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:my-secret-pw}
+    url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false}
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          client-id: ${CLIENT_ID:9fbd4ae2-2db3-44c7-9544-88e80255b56e}
+          client-secret: ${CLIENT_SECRET:test}
+      authorizationserver:
+        endpoint:
+          token-uri: "${oauth.serviceUrl}${oauth.tokenEndpoint}"
+    user:
+      name: ${BASIC_USERNAME:changeme}
+      password: ${BASIC_PASSWORD:changeme}
+  flyway:
+    locations: classpath:db/migration/{vendor}
+    enabled: true
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: ${JWT_KEY:TONterOunSTRUcIenscaDiSHoUrPantf}
